@@ -26,7 +26,7 @@ allowed_hosts_default = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1')
 ALLOWED_HOSTS = allowed_hosts_default.split(',')
 
 # CSRF_TRUSTED_ORIGINS
-csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000,http://127.0.0.1:8000')
+csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:9000,http://127.0.0.1:9000')
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(',')]
 
 
