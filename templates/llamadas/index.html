@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="call-section">
+    <h2>Iniciar Nueva Llamada</h2>
+    <form id="form-llamada" class="call-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="numero_destino">Número de Destino:</label>
+            <input 
+                type="tel" 
+                id="numero_destino" 
+                name="numero_destino" 
+                placeholder="+1234567890"
+                required
+                pattern="^\+?[1-9]\d{1,14}$"
+            >
+            <small>Formato: +1234567890 (incluir código de país)</small>
+        </div>
+        <button type="submit" class="btn-primary">Iniciar Llamada</button>
+    </form>
+    
+    <div id="mensaje-resultado" class="mensaje-resultado"></div>
+</div>
+
+<div class="llamadas-recientes">
+    <h2>Llamadas Recientes</h2>
+    {% if llamadas %}
+    <table class="llamadas-table">
+        <thead>
+            <tr>
+                <th>SID</th>
+                <th>Destino</th>
+                <th>Estado</th>
+                <th>Duración</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for llamada in llamadas %}
+            <tr>
+                <td>{{ llamada.sid|truncatechars:20 }}</td>
+                <td>{{ llamada.numero_destino }}</td>
+                <td><span class="estado estado-{{ llamada.estado }}">{{ llamada.get_estado_display }}</span></td>
+                <td>{{ llamada.duracion }}s</td>
+                <td>{{ llamada.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                <td><a href="{% url 'llamadas:detalle_llamada' llamada.id %}" class="btn-link">Ver Detalle</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="sin-datos">No hay llamadas registradas aún.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('form-llamada').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const mensajeDiv = document.getElementById('mensaje-resultado');
+    const boton = this.querySelector('button[type="submit"]');
+    
+    mensajeDiv.innerHTML = '<p class="cargando">Iniciando llamada...</p>';
+    boton.disabled = true;
+    
+    try {
+        const response = await fetch('{% url "llamadas:iniciar_llamada" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            mensajeDiv.innerHTML = `<p class="exito">✓ ${data.mensaje}</p>`;
+            this.reset();
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        } else {
+            mensajeDiv.innerHTML = `<p class="error">✗ ${data.error || 'Error al iniciar la llamada'}</p>`;
+        }
+    } catch (error) {
+        mensajeDiv.innerHTML = `<p class="error">✗ Error de conexión: ${error.message}</p>`;
+    } finally {
+        boton.disabled = false;
+    }
+});
+</script>
+{% endblock %}
+

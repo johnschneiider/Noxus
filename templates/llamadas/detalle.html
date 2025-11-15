@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="detalle-llamada">
+    <a href="{% url 'llamadas:index' %}" class="btn-back">← Volver</a>
+    
+    <h2>Detalle de Llamada</h2>
+    
+    <div class="info-llamada">
+        <div class="info-item">
+            <strong>SID:</strong> {{ llamada.sid }}
+        </div>
+        <div class="info-item">
+            <strong>Destino:</strong> {{ llamada.numero_destino }}
+        </div>
+        <div class="info-item">
+            <strong>Origen:</strong> {{ llamada.numero_origen }}
+        </div>
+        <div class="info-item">
+            <strong>Estado:</strong> <span class="estado estado-{{ llamada.estado }}">{{ llamada.get_estado_display }}</span>
+        </div>
+        <div class="info-item">
+            <strong>Duración:</strong> {{ llamada.duracion }} segundos
+        </div>
+        <div class="info-item">
+            <strong>Fecha de Creación:</strong> {{ llamada.fecha_creacion|date:"d/m/Y H:i:s" }}
+        </div>
+        {% if llamada.fecha_inicio %}
+        <div class="info-item">
+            <strong>Fecha de Inicio:</strong> {{ llamada.fecha_inicio|date:"d/m/Y H:i:s" }}
+        </div>
+        {% endif %}
+        {% if llamada.fecha_fin %}
+        <div class="info-item">
+            <strong>Fecha de Fin:</strong> {{ llamada.fecha_fin|date:"d/m/Y H:i:s" }}
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if mensajes %}
+    <div class="conversacion">
+        <h3>Conversación</h3>
+        <div class="mensajes">
+            {% for mensaje in mensajes %}
+            <div class="mensaje mensaje-{{ mensaje.tipo }}">
+                <div class="mensaje-header">
+                    <strong>{{ mensaje.get_tipo_display }}</strong>
+                    <span class="timestamp">{{ mensaje.timestamp|date:"H:i:s" }}</span>
+                </div>
+                <div class="mensaje-contenido">{{ mensaje.contenido }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <p class="sin-datos">No hay mensajes en esta conversación aún.</p>
+    {% endif %}
+    
+    {% if llamada.transcripcion %}
+    <div class="transcripcion">
+        <h3>Transcripción Completa</h3>
+        <pre>{{ llamada.transcripcion }}</pre>
+    </div>
+    {% endif %}
+    
+    {% if llamada.notas %}
+    <div class="notas">
+        <h3>Notas</h3>
+        <p>{{ llamada.notas }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
